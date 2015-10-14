@@ -1,0 +1,23 @@
+*.Po
+.deps
+*.[oa]
+*.so
+*.swp
+*.swo
+*~
+
+# http://www.gnu.org/software/autoconf
+
+Makefile
+stamp-h1
+
+/autom4te.cache
+config.log
+config.status
+configure.lineno
+compile
+missing
+
+# /aclocal.m4
+# /depcomp
+# /install-sh
