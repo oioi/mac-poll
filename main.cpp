@@ -10,7 +10,7 @@
 #include "main.h"
 
 namespace {
-   const char *progname = "macc";
+   const char *progname = "mac-collector";
    const char *conffile = "macc.conf";
 
    conf::config_map snmp_section {
@@ -88,17 +88,18 @@ void prepare_outdir(syncdata *sdata)
    time_t rawtime = time(nullptr);
    tm *timeinfo = localtime(&rawtime);
 
+   umask(S_IWGRP | S_IWOTH | S_IROTH | S_IXOTH);
    path.print("%s/%u", config["macpath"].get<conf::string_t>().c_str(), timeinfo->tm_year + 1900);
    if (-1 == stat(path.data(), &stbuf))
    {
-      if (ENOENT == errno) mkdir(path.data(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+      if (ENOENT == errno) mkdir(path.data(), S_IRWXU | S_IRGRP | S_IXGRP);
       else logger.error_exit(funcname, "Error while trying to obtain directory '%s' stats: %s", path.data(), strerror(errno));
    }
 
    path.append("/%02u-%u", timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
    if (-1 == stat(path.data(), &stbuf))
    {
-      if (ENOENT == errno) mkdir(path.data(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+      if (ENOENT == errno) mkdir(path.data(), S_IRWXU | S_IRGRP | S_IXGRP);
       else logger.error_exit(funcname, "Error while trying to obtain directory '%s' stats: %s", path.data(), strerror(errno));
    }
 
@@ -524,7 +525,7 @@ void poller(syncdata *sdata)
 
 int main(void)
 {
-   logger.method = logging::log_method::M_STDE;
+   openlog(progname, LOG_PID, LOG_LOCAL7);
    if (0 == conf::read_config(conffile, config))
       logger.error_exit(progname, "Errors in the configuration file.");
 
@@ -556,3 +557,4 @@ int main(void)
          pollstat.recv_mac_count, pollstat.save_mac_count, elapsed.count());
    return 0;
 }
+
